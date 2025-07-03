@@ -72,19 +72,71 @@ export class MemStorage implements IStorage {
     }
     this.semesterIdCounter = 9;
 
-    // Initialize sample subjects for 3rd semester
-    const sampleSubjects = [
+    // Initialize sample subjects for all semesters
+    const allSubjects = [
+      // 1st Semester
+      { name: "Mathematics I", code: "CS101", semesterId: 1 },
+      { name: "Physics", code: "CS102", semesterId: 1 },
+      { name: "Programming Fundamentals", code: "CS103", semesterId: 1 },
+      { name: "English Communication", code: "CS104", semesterId: 1 },
+      { name: "Computer Fundamentals", code: "CS105", semesterId: 1 },
+      
+      // 2nd Semester
+      { name: "Mathematics II", code: "CS201", semesterId: 2 },
+      { name: "Chemistry", code: "CS202", semesterId: 2 },
+      { name: "Object Oriented Programming", code: "CS203", semesterId: 2 },
+      { name: "Digital Logic", code: "CS204", semesterId: 2 },
+      { name: "Technical Writing", code: "CS205", semesterId: 2 },
+      
+      // 3rd Semester
       { name: "Data Structures & Algorithms", code: "CS301", semesterId: 3 },
       { name: "Database Management Systems", code: "CS302", semesterId: 3 },
       { name: "Computer Networks", code: "CS303", semesterId: 3 },
       { name: "Operating Systems", code: "CS304", semesterId: 3 },
       { name: "Software Engineering", code: "CS305", semesterId: 3 },
+      
+      // 4th Semester
+      { name: "Web Development", code: "CS401", semesterId: 4 },
+      { name: "Computer Graphics", code: "CS402", semesterId: 4 },
+      { name: "Theory of Computation", code: "CS403", semesterId: 4 },
+      { name: "Microprocessors", code: "CS404", semesterId: 4 },
+      { name: "Software Testing", code: "CS405", semesterId: 4 },
+      
+      // 5th Semester
+      { name: "Machine Learning", code: "CS501", semesterId: 5 },
+      { name: "Artificial Intelligence", code: "CS502", semesterId: 5 },
+      { name: "Mobile App Development", code: "CS503", semesterId: 5 },
+      { name: "Network Security", code: "CS504", semesterId: 5 },
+      { name: "Project Management", code: "CS505", semesterId: 5 },
+      
+      // 6th Semester
+      { name: "Data Mining", code: "CS601", semesterId: 6 },
+      { name: "Cloud Computing", code: "CS602", semesterId: 6 },
+      { name: "Distributed Systems", code: "CS603", semesterId: 6 },
+      { name: "Compiler Design", code: "CS604", semesterId: 6 },
+      { name: "Human Computer Interaction", code: "CS605", semesterId: 6 },
+      
+      // 7th Semester
+      { name: "Big Data Analytics", code: "CS701", semesterId: 7 },
+      { name: "Blockchain Technology", code: "CS702", semesterId: 7 },
+      { name: "Internet of Things", code: "CS703", semesterId: 7 },
+      { name: "Cybersecurity", code: "CS704", semesterId: 7 },
+      { name: "Industry Project", code: "CS705", semesterId: 7 },
+      
+      // 8th Semester
+      { name: "Final Year Project", code: "CS801", semesterId: 8 },
+      { name: "Advanced Algorithms", code: "CS802", semesterId: 8 },
+      { name: "Quantum Computing", code: "CS803", semesterId: 8 },
+      { name: "Professional Ethics", code: "CS804", semesterId: 8 },
+      { name: "Entrepreneurship", code: "CS805", semesterId: 8 },
     ];
 
-    sampleSubjects.forEach((subjectData) => {
+    allSubjects.forEach((subjectData) => {
       const subject: Subject = {
         id: this.subjectIdCounter++,
-        ...subjectData,
+        name: subjectData.name,
+        code: subjectData.code,
+        semesterId: subjectData.semesterId,
         description: `Core subject for ${subjectData.name}`,
       };
       this.subjects.set(subject.id, subject);
@@ -162,7 +214,12 @@ export class MemStorage implements IStorage {
 
   async createSemester(semester: InsertSemester): Promise<Semester> {
     const id = this.semesterIdCounter++;
-    const newSemester: Semester = { ...semester, id };
+    const newSemester: Semester = { 
+      ...semester, 
+      id,
+      description: semester.description ?? null,
+      subjectCount: semester.subjectCount ?? null,
+    };
     this.semesters.set(id, newSemester);
     return newSemester;
   }
@@ -179,7 +236,11 @@ export class MemStorage implements IStorage {
 
   async createSubject(subject: InsertSubject): Promise<Subject> {
     const id = this.subjectIdCounter++;
-    const newSubject: Subject = { ...subject, id };
+    const newSubject: Subject = { 
+      ...subject, 
+      id,
+      description: subject.description ?? null,
+    };
     this.subjects.set(id, newSubject);
     return newSubject;
   }
@@ -199,8 +260,13 @@ export class MemStorage implements IStorage {
   async createMaterial(material: InsertMaterial): Promise<Material> {
     const id = this.materialIdCounter++;
     const newMaterial: Material = { 
-      ...material, 
-      id, 
+      id,
+      title: material.title,
+      type: material.type,
+      subjectId: material.subjectId,
+      fileName: material.fileName,
+      fileSize: material.fileSize ?? null,
+      filePath: material.filePath,
       uploadedAt: new Date() 
     };
     this.materials.set(id, newMaterial);
@@ -231,8 +297,16 @@ export class MemStorage implements IStorage {
   async createExamPaper(examPaper: InsertExamPaper): Promise<ExamPaper> {
     const id = this.examPaperIdCounter++;
     const newExamPaper: ExamPaper = { 
-      ...examPaper, 
-      id, 
+      id,
+      title: examPaper.title,
+      type: examPaper.type,
+      subjectId: examPaper.subjectId,
+      year: examPaper.year,
+      examDate: examPaper.examDate ?? null,
+      duration: examPaper.duration ?? null,
+      marks: examPaper.marks ?? null,
+      fileName: examPaper.fileName,
+      filePath: examPaper.filePath,
       uploadedAt: new Date() 
     };
     this.examPapers.set(id, newExamPaper);
@@ -243,7 +317,8 @@ export class MemStorage implements IStorage {
     const results: (Material & { subject: Subject; semester: Semester })[] = [];
     const lowercaseQuery = query.toLowerCase();
 
-    for (const material of this.materials.values()) {
+    const materials = Array.from(this.materials.values());
+    for (const material of materials) {
       const subject = this.subjects.get(material.subjectId);
       const semester = subject ? this.semesters.get(subject.semesterId) : undefined;
 
