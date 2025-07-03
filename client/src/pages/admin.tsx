@@ -28,7 +28,7 @@ const materialSchema = z.object({
 const examPaperSchema = z.object({
   title: z.string().min(1, "Title is required"),
   type: z.enum(["internal", "university"]),
-  subjectId: z.number(),
+  semesterId: z.number(),
   year: z.number().min(2020).max(2030),
   examDate: z.string().optional(),
   duration: z.string().optional(),
@@ -77,7 +77,7 @@ export default function AdminPage() {
     defaultValues: {
       title: "",
       type: "internal" as const,
-      subjectId: 0,
+      semesterId: 0,
       year: new Date().getFullYear(),
       examDate: "",
       duration: "",
@@ -309,6 +309,22 @@ export default function AdminPage() {
                     </div>
                   </div>
 
+                  <div>
+                    <Label htmlFor="examSemesterId">Semester</Label>
+                    <Select onValueChange={(value) => examPaperForm.setValue("semesterId", parseInt(value))}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select semester" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {semesters.map((semester) => (
+                          <SelectItem key={semester.id} value={semester.id.toString()}>
+                            {semester.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
                   <div className="grid grid-cols-3 gap-4">
                     <div>
                       <Label htmlFor="year">Year</Label>
@@ -347,30 +363,13 @@ export default function AdminPage() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="examFileName">File Name</Label>
-                      <Input 
-                        id="examFileName"
-                        {...examPaperForm.register("fileName")}
-                        placeholder="e.g. internal_exam_2024.pdf"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="examSubjectId">Subject</Label>
-                      <Select onValueChange={(value) => examPaperForm.setValue("subjectId", parseInt(value))}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select subject" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {subjects.map((subject) => (
-                            <SelectItem key={subject.id} value={subject.id.toString()}>
-                              {subject.name} ({subject.code})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                  <div>
+                    <Label htmlFor="examFileName">File Name</Label>
+                    <Input 
+                      id="examFileName"
+                      {...examPaperForm.register("fileName")}
+                      placeholder="e.g. internal_exam_2024_all_subjects.pdf"
+                    />
                   </div>
 
                   <div>

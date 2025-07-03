@@ -33,7 +33,8 @@ export const examPapers = pgTable("exam_papers", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   type: text("type").notNull(), // 'internal', 'university'
-  subjectId: integer("subject_id").notNull(),
+  subjectId: integer("subject_id"),
+  semesterId: integer("semester_id"),
   year: integer("year").notNull(),
   examDate: text("exam_date"),
   duration: text("duration"),

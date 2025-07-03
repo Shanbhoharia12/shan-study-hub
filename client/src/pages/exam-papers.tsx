@@ -1,52 +1,35 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { useParams, useLocation } from "wouter";
-import { Scroll, Calendar } from "lucide-react";
+import { useParams, useLocation, Link } from "wouter";
+import { Scroll, Calendar, FileText, ChevronLeft, Download } from "lucide-react";
 import { Breadcrumb } from "@/components/breadcrumb";
-import { ExamPaperCard } from "@/components/exam-paper-card";
 import { PDFModal } from "@/components/pdf-modal";
 import { SearchBar } from "@/components/search-bar";
 import { Footer } from "@/components/footer";
-import type { Subject, ExamPaper } from "@shared/schema";
-import type { ExamType, ExamYear } from "@/lib/types";
-
-const yearColors = [
-  "from-primary to-secondary", // 2024
-  "from-emerald-500 to-teal-500", // 2023
-  "from-amber-500 to-orange-500", // 2022
-  "from-rose-500 to-pink-500", // 2021
-];
+import type { Semester, ExamPaper } from "@shared/schema";
+import type { ExamType } from "@/lib/types";
 
 export default function ExamPapersPage() {
-  const { subjectId } = useParams();
+  const { semesterId } = useParams();
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.split('?')[1] || '');
   const examType = (searchParams.get('type') || 'internal') as ExamType;
+  const year = parseInt(searchParams.get('year') || '2024');
   
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedPaper, setSelectedPaper] = useState<ExamPaper | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const id = parseInt(subjectId || "1");
+  const id = parseInt(semesterId || "1");
 
-  const { data: subject, isLoading: subjectLoading } = useQuery<Subject>({
-    queryKey: [`/api/subjects/${id}`],
-  });
-
-  const { data: years = [], isLoading: yearsLoading } = useQuery<ExamYear[]>({
-    queryKey: [`/api/subjects/${id}/exam-years`, { type: examType }],
+  const { data: semester, isLoading: semesterLoading } = useQuery<Semester>({
+    queryKey: [`/api/semesters/${id}`],
   });
 
   const { data: papers = [], isLoading: papersLoading } = useQuery<ExamPaper[]>({
-    queryKey: [`/api/subjects/${id}/exam-papers`, { type: examType, year: selectedYear }],
-    enabled: selectedYear !== null,
+    queryKey: [`/api/semesters/${id}/exam-papers`, { type: examType, year: year }],
   });
 
-  const isLoading = subjectLoading || yearsLoading || (selectedYear !== null && papersLoading);
-
-  const handleYearSelect = (year: number) => {
-    setSelectedYear(year);
-  };
+  const isLoading = semesterLoading || papersLoading;
 
   const handlePreview = (paper: ExamPaper) => {
     setSelectedPaper(paper);
@@ -58,7 +41,7 @@ export default function ExamPapersPage() {
     setSelectedPaper(null);
   };
 
-  if (isLoading && !selectedYear) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -69,12 +52,12 @@ export default function ExamPapersPage() {
     );
   }
 
-  if (!subject) {
+  if (!semester) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Subject Not Found</h2>
-          <p className="text-slate-600">The requested subject could not be found.</p>
+          <h2 className="text-2xl font-bold text-slate-800 mb-2">Semester Not Found</h2>
+          <p className="text-slate-600">The requested semester could not be found.</p>
         </div>
       </div>
     );
@@ -82,136 +65,142 @@ export default function ExamPapersPage() {
 
   const breadcrumbItems = [
     { label: "Home", href: "/" },
-    { label: "3rd Semester", href: "/semester/3" },
-    { label: subject.name, href: `/materials/${subject.id}` },
-    { label: `${examType === 'internal' ? 'Internal' : 'University'} Exam Papers` },
+    { label: semester.name, href: `/semester/${semester.id}` },
+    { label: `${examType === 'internal' ? 'Internal' : 'University'} Exam Papers ${year}` },
   ];
 
   return (
     <div className="min-h-screen bg-slate-50">
       <SearchBar />
       
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="space-y-8">
-          {/* Breadcrumb */}
-          <Breadcrumb items={breadcrumbItems} />
-
-          {/* Exam Papers Header */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-            <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-secondary/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                <Scroll className="h-8 w-8 text-secondary" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-slate-800 mb-1">
-                  {examType === 'internal' ? 'Internal' : 'University'} Exam Papers
-                </h2>
-                <p className="text-slate-500">
-                  {subject.name} - {subject.code}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Year Selection */}
-          {!selectedYear && (
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {years.map((yearData, index) => {
-                const colorClass = yearColors[index] || "from-primary to-secondary";
-                
-                return (
-                  <div
-                    key={yearData.year}
-                    className="group cursor-pointer"
-                    onClick={() => handleYearSelect(yearData.year)}
-                  >
-                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-lg hover:border-primary transition-all duration-300 group-hover:-translate-y-1">
-                      <div className="text-center space-y-2">
-                        <div className={`w-12 h-12 mx-auto bg-gradient-to-br ${colorClass} rounded-lg flex items-center justify-center`}>
-                          <Calendar className="h-6 w-6 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="font-bold text-lg text-slate-800">
-                            {yearData.year}
-                          </h3>
-                          <p className="text-sm text-slate-500">
-                            {yearData.paperCount} Papers
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* Papers for Selected Year */}
-          {selectedYear && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-slate-800">
-                  {examType === 'internal' ? 'Internal' : 'University'} Papers - {selectedYear}
-                </h3>
-                <button
-                  onClick={() => setSelectedYear(null)}
-                  className="text-primary hover:text-primary/80 text-sm font-medium"
-                >
-                  ← Back to Years
-                </button>
-              </div>
-
-              {papersLoading ? (
-                <div className="text-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-                  <p className="text-slate-600">Loading papers...</p>
-                </div>
-              ) : papers.length > 0 ? (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {papers.map((paper) => (
-                    <ExamPaperCard
-                      key={paper.id}
-                      paper={paper}
-                      onPreview={handlePreview}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 mx-auto bg-slate-100 rounded-xl flex items-center justify-center mb-4">
-                    <Scroll className="h-8 w-8 text-slate-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                    No Papers Available
-                  </h3>
-                  <p className="text-slate-600">
-                    Exam papers for {selectedYear} will be added soon.
-                  </p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Empty State for No Years */}
-          {!selectedYear && years.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 mx-auto bg-slate-100 rounded-xl flex items-center justify-center mb-4">
-                <Calendar className="h-8 w-8 text-slate-400" />
-              </div>
-              <h3 className="text-lg font-semibold text-slate-800 mb-2">
-                No Exam Papers Available
-              </h3>
+      <main className="container mx-auto px-4 py-8">
+        <Breadcrumb items={breadcrumbItems} />
+        
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-800 mb-2 flex items-center">
+                {examType === 'internal' ? (
+                  <FileText className="h-8 w-8 mr-3 text-blue-600" />
+                ) : (
+                  <Scroll className="h-8 w-8 mr-3 text-green-600" />
+                )}
+                {examType === 'internal' ? 'Internal' : 'University'} Exam Papers
+              </h1>
               <p className="text-slate-600">
-                {examType === 'internal' ? 'Internal' : 'University'} exam papers for this subject will be added soon.
+                {semester.name} • {year} • All Subjects Combined
               </p>
             </div>
-          )}
+            
+            <Link href={`/semester/${semesterId}`}>
+              <button className="flex items-center px-4 py-2 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
+                <ChevronLeft className="h-4 w-4 mr-2" />
+                Back to Semester
+              </button>
+            </Link>
+          </div>
+
+          {/* Year Badge */}
+          <div className="flex items-center mb-6">
+            <div className="flex items-center px-4 py-2 bg-white rounded-lg border border-slate-200">
+              <Calendar className="h-5 w-5 mr-2 text-slate-600" />
+              <span className="font-semibold text-slate-800">{year}</span>
+            </div>
+          </div>
         </div>
+
+        {/* Exam Papers Grid */}
+        {papers.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {papers.map((paper) => (
+              <div key={paper.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-2">
+                      {paper.title}
+                    </h3>
+                    
+                    <div className="space-y-1 mb-4">
+                      {paper.examDate && (
+                        <p className="text-sm text-slate-600">
+                          <span className="font-medium">Date:</span> {paper.examDate}
+                        </p>
+                      )}
+                      {paper.duration && (
+                        <p className="text-sm text-slate-600">
+                          <span className="font-medium">Duration:</span> {paper.duration}
+                        </p>
+                      )}
+                      {paper.marks && (
+                        <p className="text-sm text-slate-600">
+                          <span className="font-medium">Max Marks:</span> {paper.marks}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    examType === 'internal' 
+                      ? 'bg-blue-100 text-blue-700' 
+                      : 'bg-green-100 text-green-700'
+                  }`}>
+                    {examType === 'internal' ? 'Internal' : 'University'}
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handlePreview(paper)}
+                    className="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors flex items-center justify-center"
+                  >
+                    <FileText className="h-4 w-4 mr-2" />
+                    Preview
+                  </button>
+                  
+                  <a
+                    href={paper.filePath}
+                    download
+                    className="px-4 py-2 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors flex items-center justify-center"
+                  >
+                    <Download className="h-4 w-4" />
+                  </a>
+                </div>
+
+                {paper.fileName && (
+                  <p className="text-xs text-slate-500 mt-2 truncate">
+                    File: {paper.fileName}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <div className="w-20 h-20 mx-auto bg-slate-100 rounded-xl flex items-center justify-center mb-6">
+              {examType === 'internal' ? (
+                <FileText className="h-10 w-10 text-slate-400" />
+              ) : (
+                <Scroll className="h-10 w-10 text-slate-400" />
+              )}
+            </div>
+            <h3 className="text-xl font-semibold text-slate-800 mb-3">
+              No Exam Papers Available
+            </h3>
+            <p className="text-slate-600 mb-6">
+              No {examType} exam papers found for {year}. Papers will be uploaded soon.
+            </p>
+            <Link href={`/semester/${semesterId}`}>
+              <button className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg transition-colors">
+                Back to Semester
+              </button>
+            </Link>
+          </div>
+        )}
       </main>
 
       <Footer />
 
-      <PDFModal
+      <PDFModal 
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         item={selectedPaper}

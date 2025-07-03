@@ -34,6 +34,7 @@ export interface IStorage {
   // Exam Papers
   getExamPapersBySubject(subjectId: number, type?: string): Promise<ExamPaper[]>;
   getExamPapersByYear(subjectId: number, type: string, year: number): Promise<ExamPaper[]>;
+  getExamPapersBySemester(semesterId: number, type?: string, year?: number): Promise<ExamPaper[]>;
   getExamPaper(id: number): Promise<ExamPaper | undefined>;
   createExamPaper(examPaper: InsertExamPaper): Promise<ExamPaper>;
 
@@ -422,10 +423,23 @@ export class DatabaseStorage implements IStorage {
     return newPaper;
   }
 
+  async getExamPapersBySemester(semesterId: number, type?: string, year?: number): Promise<ExamPaper[]> {
+    const conditions = [eq(examPapers.semesterId, semesterId)];
+    
+    if (type) {
+      conditions.push(eq(examPapers.type, type));
+    }
+    if (year) {
+      conditions.push(eq(examPapers.year, year));
+    }
+    
+    return await db.select().from(examPapers).where(and(...conditions));
+  }
+
   async searchMaterials(query: string): Promise<(Material & { subject: Subject; semester: Semester })[]> {
     // For now, return empty array - can be implemented with proper JOIN queries
     return [];
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();

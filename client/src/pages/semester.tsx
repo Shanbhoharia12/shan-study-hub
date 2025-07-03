@@ -114,12 +114,12 @@ export default function SemesterPage() {
                       <p className="text-sm text-slate-500">Previous internal assessments</p>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    {subjects.map((subject) => (
-                      <Link key={subject.id} href={`/exam-papers/${subject.id}?type=internal`}>
-                        <button className="w-full text-left p-3 rounded-lg bg-slate-50 hover:bg-secondary/10 hover:border-secondary transition-colors border border-transparent">
-                          <span className="font-medium text-slate-700">{subject.name}</span>
-                          <span className="text-xs text-slate-500 block">{subject.code}</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[2024, 2023, 2022, 2021, 2020, 2019].map((year) => (
+                      <Link key={year} href={`/exam-papers/${semesterId}?type=internal&year=${year}`}>
+                        <button className="w-full text-center p-4 rounded-lg bg-slate-50 hover:bg-secondary/10 hover:border-secondary transition-colors border border-transparent">
+                          <span className="font-bold text-xl text-slate-700 block">{year}</span>
+                          <span className="text-xs text-slate-500">All Subjects</span>
                         </button>
                       </Link>
                     ))}
@@ -141,12 +141,12 @@ export default function SemesterPage() {
                       <p className="text-sm text-slate-500">Previous university examinations</p>
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    {subjects.map((subject) => (
-                      <Link key={subject.id} href={`/exam-papers/${subject.id}?type=university`}>
-                        <button className="w-full text-left p-3 rounded-lg bg-slate-50 hover:bg-primary/10 hover:border-primary transition-colors border border-transparent">
-                          <span className="font-medium text-slate-700">{subject.name}</span>
-                          <span className="text-xs text-slate-500 block">{subject.code}</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[2024, 2023, 2022, 2021, 2020, 2019].map((year) => (
+                      <Link key={year} href={`/exam-papers/${semesterId}?type=university&year=${year}`}>
+                        <button className="w-full text-center p-4 rounded-lg bg-slate-50 hover:bg-primary/10 hover:border-primary transition-colors border border-transparent">
+                          <span className="font-bold text-xl text-slate-700 block">{year}</span>
+                          <span className="text-xs text-slate-500">All Subjects</span>
                         </button>
                       </Link>
                     ))}

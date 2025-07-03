@@ -126,6 +126,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // New semester-based exam paper route
+  app.get("/api/semesters/:semesterId/exam-papers", async (req, res) => {
+    try {
+      const semesterId = parseInt(req.params.semesterId);
+      const type = req.query.type as string;
+      const year = parseInt(req.query.year as string);
+      
+      const papers = await storage.getExamPapersBySemester(semesterId, type, year);
+      res.json(papers);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch semester exam papers" });
+    }
+  });
+
   // POST routes for creating content
   app.post("/api/semesters", async (req, res) => {
     try {

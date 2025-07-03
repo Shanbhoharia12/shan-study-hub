@@ -102,12 +102,17 @@ Modular component architecture:
 
 ## Recent Changes
 
-- **July 03, 2025**: Database integration completed
+- **July 03, 2025**: Database integration and exam paper structure update completed
   - Added PostgreSQL database with Drizzle ORM
   - Created admin panel for uploading materials and exam papers
   - Updated semester page layout with separate exam sections
   - Fixed semester loading issues by adding content for all 8 semesters
-  - Added database storage implementation alongside in-memory storage
+  - **Updated exam paper organization**: Changed from subject-based to year-based structure
+    - Internal/University exam sections now show years instead of individual subjects
+    - Each year contains combined papers for all subjects in that semester
+    - Admin panel updated to upload semester-wide exam papers
+    - Database schema modified to support both subject-specific and semester-wide papers
+  - Switched to DatabaseStorage for production data handling
 
 ## Material Upload Process
 
