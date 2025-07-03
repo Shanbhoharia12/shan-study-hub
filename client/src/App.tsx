@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import SemesterPage from "@/pages/semester";
 import MaterialsPage from "@/pages/materials";
 import ExamPapersPage from "@/pages/exam-papers";
+import AdminPage from "@/pages/admin";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -17,6 +18,7 @@ function Router() {
       <Route path="/semester/:semesterId" component={SemesterPage} />
       <Route path="/materials/:subjectId" component={MaterialsPage} />
       <Route path="/exam-papers/:subjectId" component={ExamPapersPage} />
+      <Route path="/admin" component={AdminPage} />
       <Route component={NotFound} />
     </Switch>
   );

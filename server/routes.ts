@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertSubjectSchema, insertMaterialSchema, insertExamPaperSchema } from "@shared/schema";
+import { insertSemesterSchema, insertSubjectSchema, insertMaterialSchema, insertExamPaperSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Semesters routes
@@ -123,6 +123,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(paper);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch exam paper" });
+    }
+  });
+
+  // POST routes for creating content
+  app.post("/api/semesters", async (req, res) => {
+    try {
+      const result = insertSemesterSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid semester data" });
+      }
+      const semester = await storage.createSemester(result.data);
+      res.status(201).json(semester);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create semester" });
+    }
+  });
+
+  app.post("/api/subjects", async (req, res) => {
+    try {
+      const result = insertSubjectSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid subject data" });
+      }
+      const subject = await storage.createSubject(result.data);
+      res.status(201).json(subject);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create subject" });
+    }
+  });
+
+  app.post("/api/materials", async (req, res) => {
+    try {
+      const result = insertMaterialSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid material data" });
+      }
+      const material = await storage.createMaterial(result.data);
+      res.status(201).json(material);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create material" });
+    }
+  });
+
+  app.post("/api/exam-papers", async (req, res) => {
+    try {
+      const result = insertExamPaperSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: "Invalid exam paper data" });
+      }
+      const examPaper = await storage.createExamPaper(result.data);
+      res.status(201).json(examPaper);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create exam paper" });
     }
   });
 

@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Book, FileText, Code, ClipboardList, Scroll, GraduationCap } from "lucide-react";
+import { Book, FileText, Code, ClipboardList } from "lucide-react";
 import type { SubjectWithCounts } from "@/lib/types";
 
 interface SubjectCardProps {
@@ -55,27 +55,6 @@ export function SubjectCard({ subject }: SubjectCardProps) {
               </Link>
             </div>
           </div>
-        </div>
-      </div>
-      
-      {/* Exam Papers Section */}
-      <div className="border-t border-slate-100 p-4 bg-slate-25">
-        <h4 className="text-sm font-medium text-slate-700 mb-2">
-          Previous Year Papers
-        </h4>
-        <div className="grid grid-cols-2 gap-2">
-          <Link href={`/exam-papers/${subject.id}?type=internal`}>
-            <button className="p-2 text-xs bg-white rounded-lg border border-slate-200 hover:border-primary hover:text-primary transition-colors w-full">
-              <Scroll className="inline h-3 w-3 mr-1" />
-              Internal Exam
-            </button>
-          </Link>
-          <Link href={`/exam-papers/${subject.id}?type=university`}>
-            <button className="p-2 text-xs bg-white rounded-lg border border-slate-200 hover:border-primary hover:text-primary transition-colors w-full">
-              <GraduationCap className="inline h-3 w-3 mr-1" />
-              University Exam
-            </button>
-          </Link>
         </div>
       </div>
     </div>

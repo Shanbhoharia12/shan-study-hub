@@ -100,10 +100,63 @@ Modular component architecture:
 - `shared/`: Common TypeScript types and schemas
 - `dist/`: Production build output
 
-## Changelog
+## Recent Changes
 
-Changelog:
-- July 03, 2025. Initial setup
+- **July 03, 2025**: Database integration completed
+  - Added PostgreSQL database with Drizzle ORM
+  - Created admin panel for uploading materials and exam papers
+  - Updated semester page layout with separate exam sections
+  - Fixed semester loading issues by adding content for all 8 semesters
+  - Added database storage implementation alongside in-memory storage
+
+## Material Upload Process
+
+As the content manager, you can upload materials through the admin panel:
+
+1. **Access Admin Panel**: Navigate to `/admin` in your browser
+2. **Upload Study Materials**: 
+   - Select material type (notes, practical, assignment)
+   - Choose semester and subject
+   - Add file details and upload path
+3. **Upload Exam Papers**:
+   - Select exam type (internal/university)
+   - Add year, duration, marks information
+   - Specify file location
+4. **Add New Subjects**:
+   - Create subjects for any semester
+   - Add subject name, code, and description
+
+## Database Setup
+
+- PostgreSQL database configured and schema pushed
+- Environment variables available: DATABASE_URL, PGPORT, PGUSER, etc.
+- Can switch between MemStorage (development) and DatabaseStorage (production)
+
+## Deployment Instructions
+
+### Running Locally
+1. Clone/download the project files
+2. Install Node.js (version 20 recommended)
+3. Run `npm install` to install dependencies
+4. Run `npm run dev` to start development server
+5. Visit `http://localhost:5000` in your browser
+
+### Free Hosting Options
+1. **Replit Deployment**: 
+   - Use the deploy button in Replit interface
+   - Automatic hosting with custom domain option
+2. **Vercel** (recommended):
+   - Connect GitHub repository
+   - Deploy with one click
+   - Free custom domain support
+3. **Netlify**:
+   - Drag and drop deployment
+   - Free hosting for static sites
+
+### Database Hosting
+- Use Neon (free PostgreSQL hosting)
+- Configure DATABASE_URL environment variable
+- Run `npm run db:push` to create tables
 
 ## User Preferences
 

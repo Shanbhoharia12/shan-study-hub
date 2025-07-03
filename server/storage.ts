@@ -6,8 +6,14 @@ import {
   type InsertSemester,
   type InsertSubject,
   type InsertMaterial,
-  type InsertExamPaper
+  type InsertExamPaper,
+  semesters,
+  subjects,
+  materials,
+  examPapers
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface IStorage {
   // Semesters
@@ -338,6 +344,87 @@ export class MemStorage implements IStorage {
     }
 
     return results;
+  }
+}
+
+// Database storage implementation
+export class DatabaseStorage implements IStorage {
+  async getSemesters(): Promise<Semester[]> {
+    return await db.select().from(semesters).orderBy(semesters.number);
+  }
+
+  async getSemester(id: number): Promise<Semester | undefined> {
+    const [semester] = await db.select().from(semesters).where(eq(semesters.id, id));
+    return semester || undefined;
+  }
+
+  async createSemester(semester: InsertSemester): Promise<Semester> {
+    const [newSemester] = await db.insert(semesters).values(semester).returning();
+    return newSemester;
+  }
+
+  async getSubjectsBySemester(semesterId: number): Promise<Subject[]> {
+    return await db.select().from(subjects).where(eq(subjects.semesterId, semesterId));
+  }
+
+  async getSubject(id: number): Promise<Subject | undefined> {
+    const [subject] = await db.select().from(subjects).where(eq(subjects.id, id));
+    return subject || undefined;
+  }
+
+  async createSubject(subject: InsertSubject): Promise<Subject> {
+    const [newSubject] = await db.insert(subjects).values(subject).returning();
+    return newSubject;
+  }
+
+  async getMaterialsBySubject(subjectId: number, type?: string): Promise<Material[]> {
+    if (type) {
+      return await db.select().from(materials)
+        .where(and(eq(materials.subjectId, subjectId), eq(materials.type, type)));
+    }
+    return await db.select().from(materials).where(eq(materials.subjectId, subjectId));
+  }
+
+  async getMaterial(id: number): Promise<Material | undefined> {
+    const [material] = await db.select().from(materials).where(eq(materials.id, id));
+    return material || undefined;
+  }
+
+  async createMaterial(material: InsertMaterial): Promise<Material> {
+    const [newMaterial] = await db.insert(materials).values(material).returning();
+    return newMaterial;
+  }
+
+  async getExamPapersBySubject(subjectId: number, type?: string): Promise<ExamPaper[]> {
+    if (type) {
+      return await db.select().from(examPapers)
+        .where(and(eq(examPapers.subjectId, subjectId), eq(examPapers.type, type)));
+    }
+    return await db.select().from(examPapers).where(eq(examPapers.subjectId, subjectId));
+  }
+
+  async getExamPapersByYear(subjectId: number, type: string, year: number): Promise<ExamPaper[]> {
+    return await db.select().from(examPapers)
+      .where(and(
+        eq(examPapers.subjectId, subjectId),
+        eq(examPapers.type, type),
+        eq(examPapers.year, year)
+      ));
+  }
+
+  async getExamPaper(id: number): Promise<ExamPaper | undefined> {
+    const [paper] = await db.select().from(examPapers).where(eq(examPapers.id, id));
+    return paper || undefined;
+  }
+
+  async createExamPaper(examPaper: InsertExamPaper): Promise<ExamPaper> {
+    const [newPaper] = await db.insert(examPapers).values(examPaper).returning();
+    return newPaper;
+  }
+
+  async searchMaterials(query: string): Promise<(Material & { subject: Subject; semester: Semester })[]> {
+    // For now, return empty array - can be implemented with proper JOIN queries
+    return [];
   }
 }
 

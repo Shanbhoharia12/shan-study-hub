@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { useParams } from "wouter";
+import { useParams, Link } from "wouter";
 import { Breadcrumb } from "@/components/breadcrumb";
 import { SubjectCard } from "@/components/subject-card";
 import { SearchBar } from "@/components/search-bar";
@@ -86,12 +86,73 @@ export default function SemesterPage() {
             </div>
           </div>
 
-          {/* Subjects Grid */}
+          {/* Subjects Section */}
           {subjects.length > 0 ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {subjects.map((subject) => (
-                <SubjectCard key={subject.id} subject={subject} />
-              ))}
+            <div className="space-y-8">
+              {/* Subjects List */}
+              <div>
+                <h3 className="text-xl font-semibold text-slate-800 mb-4">Subjects</h3>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {subjects.map((subject) => (
+                    <SubjectCard key={subject.id} subject={subject} />
+                  ))}
+                </div>
+              </div>
+
+              {/* Exam Papers Sections */}
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Internal Exam Papers */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-800">Internal Exam Papers</h4>
+                      <p className="text-sm text-slate-500">Previous internal assessments</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {subjects.map((subject) => (
+                      <Link key={subject.id} href={`/exam-papers/${subject.id}?type=internal`}>
+                        <button className="w-full text-left p-3 rounded-lg bg-slate-50 hover:bg-secondary/10 hover:border-secondary transition-colors border border-transparent">
+                          <span className="font-medium text-slate-700">{subject.name}</span>
+                          <span className="text-xs text-slate-500 block">{subject.code}</span>
+                        </button>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* University Exam Papers */}
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                  <div className="flex items-center mb-4">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mr-3">
+                      <svg className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-slate-800">University Exam Papers</h4>
+                      <p className="text-sm text-slate-500">Previous university examinations</p>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    {subjects.map((subject) => (
+                      <Link key={subject.id} href={`/exam-papers/${subject.id}?type=university`}>
+                        <button className="w-full text-left p-3 rounded-lg bg-slate-50 hover:bg-primary/10 hover:border-primary transition-colors border border-transparent">
+                          <span className="font-medium text-slate-700">{subject.name}</span>
+                          <span className="text-xs text-slate-500 block">{subject.code}</span>
+                        </button>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
           ) : (
             <div className="text-center py-12">

@@ -38,6 +38,10 @@ export function Navigation() {
                 <Mail className="h-4 w-4 mr-1" />
                 Contact
               </button>
+              <Link href="/admin" className="text-slate-600 hover:text-primary px-3 py-2 text-sm font-medium transition-colors flex items-center">
+                <Info className="h-4 w-4 mr-1" />
+                Admin
+              </Link>
             </div>
           </div>
           
