@@ -1,13 +1,23 @@
-import type { Express } from "express";
-import { createServer, type Server } from "http";
+import { type Express } from "express";
+import { createServer } from "http";
+import { db } from "./db";
+import { materials as materialsTable, examPapers as examPapersTable, semesters as semestersTable, subjects as subjectsTable } from "../shared/schema";
+import { eq } from "drizzle-orm";
 import { storage } from "./storage";
 import { insertSemesterSchema, insertSubjectSchema, insertMaterialSchema, insertExamPaperSchema } from "@shared/schema";
 
-export async function registerRoutes(app: Express): Promise<Server> {
+export async function registerRoutes(app: Express) {
+  const server = createServer(app);
+
+  // Health check endpoint for Render
+  app.get("/api/health", (_req, res) => {
+    res.status(200).json({ status: "healthy" });
+  });
+
   // Semesters routes
   app.get("/api/semesters", async (req, res) => {
     try {
-      const semesters = await storage.getSemesters();
+      const semesters = await db.select().from(semestersTable);
       res.json(semesters);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch semesters" });
@@ -17,7 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/semesters/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const semester = await storage.getSemester(id);
+      const semester = await db.select().from(semestersTable).where(eq(semestersTable.id, id));
       if (!semester) {
         return res.status(404).json({ error: "Semester not found" });
       }
@@ -31,14 +41,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/semesters/:semesterId/subjects", async (req, res) => {
     try {
       const semesterId = parseInt(req.params.semesterId);
-      const subjects = await storage.getSubjectsBySemester(semesterId);
+      const subjects = await db.select().from(subjectsTable).where(eq(subjectsTable.semesterId, semesterId));
       
       // Add material counts for each subject
       const subjectsWithCounts = await Promise.all(
         subjects.map(async (subject) => {
-          const notes = await storage.getMaterialsBySubject(subject.id, "notes");
-          const practicals = await storage.getMaterialsBySubject(subject.id, "practical");
-          const assignments = await storage.getMaterialsBySubject(subject.id, "assignment");
+          const notes = await db.select().from(materialsTable).where(eq(materialsTable.subjectId, subject.id));
+          const practicals = await db.select().from(materialsTable).where(eq(materialsTable.subjectId, subject.id));
+          const assignments = await db.select().from(materialsTable).where(eq(materialsTable.subjectId, subject.id));
           
           return {
             ...subject,
@@ -58,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/subjects/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const subject = await storage.getSubject(id);
+      const subject = await db.select().from(subjectsTable).where(eq(subjectsTable.id, id));
       if (!subject) {
         return res.status(404).json({ error: "Subject not found" });
       }
@@ -73,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const subjectId = parseInt(req.params.subjectId);
       const type = req.query.type as string;
-      const materials = await storage.getMaterialsBySubject(subjectId, type);
+      const materials = await db.select().from(materialsTable).where(eq(materialsTable.subjectId, subjectId));
       res.json(materials);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch materials" });
@@ -83,7 +93,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/materials/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const material = await storage.getMaterial(id);
+      const material = await db.select().from(materialsTable).where(eq(materialsTable.id, id));
       if (!material) {
         return res.status(404).json({ error: "Material not found" });
       }
@@ -102,9 +112,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let papers;
       if (year && type) {
-        papers = await storage.getExamPapersByYear(subjectId, type, year);
+        papers = await db.select().from(examPapersTable).where(eq(examPapersTable.subjectId, subjectId));
       } else {
-        papers = await storage.getExamPapersBySubject(subjectId, type);
+        papers = await db.select().from(examPapersTable).where(eq(examPapersTable.subjectId, subjectId));
       }
       
       res.json(papers);
@@ -116,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/exam-papers/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const paper = await storage.getExamPaper(id);
+      const paper = await db.select().from(examPapersTable).where(eq(examPapersTable.id, id));
       if (!paper) {
         return res.status(404).json({ error: "Exam paper not found" });
       }
@@ -133,7 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const type = req.query.type as string;
       const year = parseInt(req.query.year as string);
       
-      const papers = await storage.getExamPapersBySemester(semesterId, type, year);
+      const papers = await db.select().from(examPapersTable).where(eq(examPapersTable.semesterId, semesterId));
       res.json(papers);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch semester exam papers" });
@@ -147,7 +157,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!result.success) {
         return res.status(400).json({ error: "Invalid semester data" });
       }
-      const semester = await storage.createSemester(result.data);
+      const semester = await db.insert(semestersTable).values(result.data).returning();
       res.status(201).json(semester);
     } catch (error) {
       res.status(500).json({ error: "Failed to create semester" });
@@ -160,7 +170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!result.success) {
         return res.status(400).json({ error: "Invalid subject data" });
       }
-      const subject = await storage.createSubject(result.data);
+      const subject = await db.insert(subjectsTable).values(result.data).returning();
       res.status(201).json(subject);
     } catch (error) {
       res.status(500).json({ error: "Failed to create subject" });
@@ -173,7 +183,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!result.success) {
         return res.status(400).json({ error: "Invalid material data" });
       }
-      const material = await storage.createMaterial(result.data);
+      const material = await db.insert(materialsTable).values(result.data).returning();
       res.status(201).json(material);
     } catch (error) {
       res.status(500).json({ error: "Failed to create material" });
@@ -186,7 +196,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!result.success) {
         return res.status(400).json({ error: "Invalid exam paper data" });
       }
-      const examPaper = await storage.createExamPaper(result.data);
+      const examPaper = await db.insert(examPapersTable).values(result.data).returning();
       res.status(201).json(examPaper);
     } catch (error) {
       res.status(500).json({ error: "Failed to create exam paper" });
@@ -201,7 +211,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json([]);
       }
       
-      const results = await storage.searchMaterials(query.trim());
+      const results = await db.select().from(materialsTable).where(eq(materialsTable.title, query.trim()));
       res.json(results);
     } catch (error) {
       res.status(500).json({ error: "Search failed" });
@@ -213,7 +223,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const subjectId = parseInt(req.params.subjectId);
       const type = req.query.type as string;
-      const papers = await storage.getExamPapersBySubject(subjectId, type);
+      const papers = await db.select().from(examPapersTable).where(eq(examPapersTable.subjectId, subjectId));
       
       const yearCounts = papers.reduce((acc, paper) => {
         acc[paper.year] = (acc[paper.year] || 0) + 1;
@@ -230,6 +240,5 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  const httpServer = createServer(app);
-  return httpServer;
+  return server;
 }

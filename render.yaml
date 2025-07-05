@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: shan-study-hub-backend
+    env: node
+    rootDir: StudentResourceHub
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        value: daszlcbsc
+      - key: CLOUDINARY_API_KEY
+        value: 786716792168691
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+    healthCheckPath: /api/health 
