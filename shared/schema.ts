@@ -25,7 +25,8 @@ export const materials = pgTable("materials", {
   subjectId: integer("subject_id").notNull(),
   fileName: text("file_name").notNull(),
   fileSize: text("file_size"),
-  filePath: text("file_path").notNull(),
+  cloudinaryUrl: text("cloudinary_url").notNull(),
+  cloudinaryPublicId: text("cloudinary_public_id").notNull(),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
 });
 
@@ -40,7 +41,8 @@ export const examPapers = pgTable("exam_papers", {
   duration: text("duration"),
   marks: text("marks"),
   fileName: text("file_name").notNull(),
-  filePath: text("file_path").notNull(),
+  cloudinaryUrl: text("cloudinary_url").notNull(),
+  cloudinaryPublicId: text("cloudinary_public_id").notNull(),
   uploadedAt: timestamp("uploaded_at").defaultNow(),
 });
 
