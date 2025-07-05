@@ -2,7 +2,7 @@ services:
   - type: web
     name: shan-study-hub-backend
     env: node
-    rootDir: StudentResourceHub
+    rootDir: server
     buildCommand: npm install && npm run build
     startCommand: npm run start
     envVars:
