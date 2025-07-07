@@ -1,8 +1,7 @@
 services:
   - type: web
-    name: shan-study-hub-backend
+    name: shan-study-hub
     env: node
-    rootDir: server
     buildCommand: npm install && npm run build
     startCommand: npm run start
     envVars:
@@ -11,9 +10,9 @@ services:
       - key: DATABASE_URL
         sync: false
       - key: CLOUDINARY_CLOUD_NAME
-        value: daszlcbsc
+        sync: false
       - key: CLOUDINARY_API_KEY
-        value: 786716792168691
+        sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
     healthCheckPath: /api/health 
