@@ -1,9 +1,9 @@
 services:
   - type: web
-    name: shan-study-hub
+    name: shan-study-hub-backend
     env: node
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    buildCommand: npm install && npm run build:server
+    startCommand: npm run start:server
     envVars:
       - key: NODE_ENV
         value: production

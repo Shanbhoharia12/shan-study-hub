@@ -1,11 +1,11 @@
 {
   "buildCommand": "npm install && npm run build:client",
-  "outputDirectory": "dist/client",
+  "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://shan-study-hub.onrender.com/api/$1"
+      "destination": "https://shan-study-hub-backend.onrender.com/api/$1"
     }
   ]
 }
