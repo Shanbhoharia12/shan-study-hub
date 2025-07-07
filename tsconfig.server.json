@@ -1,10 +1,10 @@
 {
   "include": ["server/**/*", "shared/**/*"],
-  "exclude": ["node_modules", "build", "dist", "**/*.test.ts"],
+  "exclude": ["node_modules", "build", "dist", "**/*.test.ts", "client/**/*"],
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "node",
     "outDir": "./dist",
     "rootDir": ".",
     "strict": true,
@@ -15,6 +15,6 @@
     "paths": {
       "@shared/*": ["./shared/*"]
     },
-    "types": ["vite/client", "node"]
+    "types": ["node"]
   }
 } 
